@@ -16,7 +16,7 @@ RUN rm -rf build\
  && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=.. ..\
  && cmake --build . --target install -j $(nproc)
 
-RUN ls -l bin/telegram-bot-api*
+RUN strip /source/bin/telegram-bot-api
 
 FROM alpine:edge AS apkextractor
 
