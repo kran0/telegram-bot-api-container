@@ -1,0 +1,6 @@
+# Pass if container default ENTRYPOINT+CMD returns 0
+# Fail if container default ENTRYPOINT+CMD returns non-zero
+
+services:
+  sut:
+    image: ${IMAGE_NAME}
