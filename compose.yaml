@@ -1,7 +1,7 @@
 #!/usr/bin/env -S podman-compose -f
 
 services:
-  davmail:
+  telegram-bot-api:
     image: kran0/telegram-bot-api:latest
 
     build:
@@ -10,18 +10,26 @@ services:
 #      args:
 #        BRANCH: "master"
 #        COMMIT: "d091a73"
-    env-file: .env # set TELEGRAM_API_ID and TELEGRAM_API_HASH
+
+    env-file: .env # set TELEGRAM_API_ID, TELEGRAM_API_HASH and FILTER
+    environment:
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}
+
+    tmpfs:
+      - ${DIR:-/work}:size=8M # Testing if tmpfs is suitable for workdir
+    volumes:
+      - ${TEMP_DIR:-/temp}    # Let the Engine create a volume
+
     command: # run kran0/telegram-bot-api:latest --help to get help message
-#      - --local                        # allow the Bot API server to serve local requests
-#      - --http-port=<arg>              # HTTP listening port (default is 8081)
 #      - --http-stat-port=<arg>         # HTTP statistics port
-      - --dir=/tmp                    # server working directory
-      - --temp-dir=/tmp               # directory for storing HTTP server temporary files
-#      - --filter=<arg>                 # "<remainder>/<modulo>". Allow only bots with 'bot_user_id % modulo == remainder'
+      - --dir=${DIR:-/work}             # server working directory
+      - --temp-dir=${TEMP_DIR:-/temp}   # directory for storing HTTP server temporary files
+      - --filter=${FILTER}              # "<remainder>/<modulo>". Allow only bots with 'bot_user_id % modulo == remainder'
 #      - --max-webhook-connections=<arg># default value of the maximum webhook connections per bot
-#      - --log=<arg>                    # path to the file where the log will be written
-#      - --verbosity=<arg>              # log verbosity level
-#      - --memory-verbosity=<arg>       # memory log verbosity level; defaults to 3
+      - --log=/dev/stdout               # path to the file where the log will be written
+      - --verbosity=1                   # log verbosity level
+      - --memory-verbosity=1            # memory log verbosity level; defaults to 3
 #      - --log-max-file-size=<arg>      # maximum size of the log file in bytes before it will be auto-rotated (default is 2000000000)
 #      - --max-connections=<arg>        # maximum number of open file descriptors
 #      - --cpu-affinity=<arg>           # CPU affinity as 64-bit mask (defaults to all available CPUs)
@@ -29,6 +37,6 @@ services:
 #      - --proxy=<arg>                  # HTTP proxy server for outgoing webhook requests in the format http://host:por
     user: 1100:1100
     ports:
-      - 8081:8081
+      - ${HTTP_PORT:-8081}:8081 # Remap external port only, leave internal as default
     restart: on-failure
     cap-drop: [ "ALL" ]
